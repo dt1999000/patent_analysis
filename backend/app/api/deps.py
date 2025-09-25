@@ -1,6 +1,7 @@
 from collections.abc import Generator
 from typing import Annotated
 
+from app.services.retrieval import Retrieval, BaseRetrieval
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -55,3 +56,6 @@ def get_current_active_superuser(current_user: CurrentUser) -> User:
             status_code=403, detail="The user doesn't have enough privileges"
         )
     return current_user
+
+def get_retrieval_service() -> Retrieval:
+    return BaseRetrieval()
