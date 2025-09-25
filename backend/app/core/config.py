@@ -115,5 +115,8 @@ class Settings(BaseSettings):
 
         return self
 
+    LOGIC_MILL_TOKEN: str
+    LOGIC_MILL_URL: str
+
 
 settings = Settings()  # type: ignore
