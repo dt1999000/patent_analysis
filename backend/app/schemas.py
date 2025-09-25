@@ -36,11 +36,16 @@ class AuthorshipInstitution(BaseModel):
     type: Optional[str] = None
     country_code: Optional[str] = None
 
+class Author(BaseModel):
+    id: str
+    display_name: str
+    orcid: Optional[str] = None
+
 class Authorship(BaseModel):
     author_position: str
-    author: Dict[str, str]  # Contains id, display_name
+    author: Author
     institutions: List[AuthorshipInstitution]
-    is_corresponding: bool
+    is_corresponding: bool = False
 
 class Concept(BaseModel):
     id: str
@@ -66,17 +71,12 @@ class PublicationContentBreakdown(BaseModel):
     methods: Optional[str]
     conclusions: Optional[str]
 
-class Publication(BaseModel):
+class PublicationSimple(BaseModel):
     id: str
-    abstract_inverted_index: Optional[Dict]
-    abstract: Optional[str]
-    doi: Optional[str]
     title: str
-    display_name: str
-    publication_year: int
-    publication_date: datetime
-    type: str
-    type_crossref: Optional[str]
+    abstract: Optional[str]
+
+class PublicationFull(PublicationSimple):
     cited_by_count: int
     is_retracted: bool
     is_paratext: bool
@@ -85,20 +85,12 @@ class Publication(BaseModel):
     topics: List[Topic]
     authorships: List[Authorship]
     concepts: List[Concept]
-    locations: List[Location]
     referenced_works: List[str]
     related_works: List[str]
     counts_by_year: List[Dict]
-    updated_date: str
-    created_date: str
 
 class PublicationGroup(BaseModel):
     group_key: str
-    publications: List[Publication]
+    publications: List[PublicationFull]
     total_citations: int
     publication_count: int
-
-class Inventor(BaseModel):
-    name: str
-    country_code: Optional[str] = None
-    openalex_id: Optional[str] = None

@@ -1,9 +1,8 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-import requests
-from app.schemas import Inventor, Publication, Topic, Authorship, AuthorshipInstitution, Concept, Location, PublicationGroup
+from app.schemas import (
+    PublicationSimple, PublicationFull, Topic, Authorship, 
+    AuthorshipInstitution, Concept, Location, PublicationGroup,
+    Author
+)
 from dataclasses import dataclass
 from typing import List, Dict, Optional, Set
 from datetime import datetime
@@ -14,40 +13,12 @@ from pyalex import Works, Authors
 pyalex.config.email = "dt1999000@gmail.com"  # Replace with your email for proper attribution
 
 
-def scrape_espacenet_inventors(url: str) -> List[Inventor]:
-    """
-    Scrape inventors from Espacenet patent pages
-    Example input URL: https://worldwide.espacenet.com/patent/...
-    """
-    driver = webdriver.Chrome()
-    try:
-        driver.get(url)
-        # Wait for inventors section to load
-        wait = WebDriverWait(driver, 10)
-        inventors_elements = wait.until(
-            EC.presence_of_all_elements_located((By.XPATH, "//div[contains(text(), 'Inventors')]/following-sibling::div"))
-        )
-        
-        inventors = []
-        for element in inventors_elements:
-            # Parse inventor text like "SAINZ FUERTES GUILLERMO [ES]"
-            text = element.text.strip()
-            if text:
-                name_parts = text.split("[")
-                name = name_parts[0].strip()
-                country_code = name_parts[1].strip("]") if len(name_parts) > 1 else None
-                inventors.append(Inventor(name=name, country_code=country_code))
-                
-        return inventors
-    finally:
-        driver.quit()
 
 
-
-class AlexScraper:
+class ScrapingService:
         
     
-    def get_works_by_author(self, author_id: str, max_works: int = 5) -> List[Publication]:
+    def get_works_by_author(self, author_id: str, max_works: int = 5) -> List[PublicationFull]:
         """
         Get works by a specific author using PyAlex
         
@@ -68,7 +39,7 @@ class AlexScraper:
             
         return publications
 
-    def get_publication(self, work_id: str) -> Publication:
+    def get_publication(self, work_id: str) -> PublicationFull:
         """
         Get detailed information about a single publication from OpenAlex API using PyAlex
         
@@ -105,9 +76,16 @@ class AlexScraper:
                 for inst in auth_data.get('institutions', [])
             ]
             
+            author_data = auth_data.get('author', {})
+            author = Author(
+                id=author_data.get('id', ''),
+                display_name=author_data.get('display_name', ''),
+                orcid=author_data.get('orcid')
+            )
+            
             authorships.append(Authorship(
                 author_position=auth_data.get('author_position', ''),
-                author=auth_data['author'],
+                author=author,
                 institutions=institutions,
                 is_corresponding=auth_data.get('is_corresponding', False)
             ))
@@ -139,15 +117,10 @@ class AlexScraper:
             for loc in work['locations']
         ]
         
-        return Publication(
+        return PublicationFull(
             id=work['id'],
-            doi=work['doi'],
             title=work['title'],
-            display_name=work['display_name'],
-            publication_year=work['publication_year'],
-            publication_date=datetime.fromisoformat(work['publication_date']),
-            type=work['type'],
-            type_crossref=work.get('type_crossref'),
+            abstract=work['abstract'] if work['abstract'] else None,
             cited_by_count=work['cited_by_count'],
             is_retracted=work.get('is_retracted', False),
             is_paratext=work.get('is_paratext', False),
@@ -156,16 +129,12 @@ class AlexScraper:
             topics=topics,
             authorships=authorships,
             concepts=concepts,
-            locations=locations,
-            abstract_inverted_index=work.get('abstract_inverted_index'),
             referenced_works=work.get('referenced_works', []),
             related_works=work.get('related_works', []),
-            counts_by_year=work.get('counts_by_year', []),
-            updated_date=work['updated_date'],
-            created_date=work['created_date']
+            counts_by_year=work.get('counts_by_year', [])
         )
 
-    def group_publications(self, publications: List[Publication], 
+    def group_publications(self, publications: List[PublicationFull], 
                         by: str = 'field',
                         min_concept_score: float = 0.5) -> Dict[str, PublicationGroup]:
         """
@@ -179,7 +148,7 @@ class AlexScraper:
         Returns:
             Dict[str, PublicationGroup]: Publications grouped by the specified criterion
         """
-        groups: Dict[str, List[Publication]] = {}
+        groups: Dict[str, List[PublicationFull]] = {}
         
         for pub in publications:
             if by in ['field', 'subfield', 'domain']:
@@ -221,7 +190,7 @@ class AlexScraper:
             for key, pubs in groups.items()
         }
 
-    def get_related_publications(self, work_id: str, limit: int = 10) -> List[Publication]:
+    def get_related_publications(self, work_id: str, limit: int = 10) -> List[PublicationFull]:
         """
         Get publications related to a specific work using PyAlex's native related_works
         
