@@ -2,9 +2,14 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Sparkles, TrendingUp, AlertTriangle } from "lucide-react";
+import type { OverviewResponse } from "@/api/types";
 
-export const NoveltyGauge = () => {
-  const noveltyScore = 78; // High novelty
+interface NoveltyGaugeProps {
+  overview: OverviewResponse;
+}
+
+export const NoveltyGauge = ({ overview }: NoveltyGaugeProps) => {
+  const noveltyScore = overview.noveltyScore; // High novelty
   const getNoveltyLevel = (score: number) => {
     if (score >= 70) return { level: "High", color: "success", icon: Sparkles };
     if (score >= 40)
@@ -64,10 +69,9 @@ export const NoveltyGauge = () => {
                 Novel Aspects
               </h4>
               <ul className="text-sm text-muted-foreground space-y-1 ml-4">
-                <li>• 10x improvement in coherence times</li>
-                <li>• Novel Majorana fermion approach</li>
-                <li>• Unique error correction mechanism</li>
-                <li>• Scalable architecture design</li>
+                {overview.novelAspects.map((aspect, idx) => (
+                  <li key={idx}>• {aspect}</li>
+                ))}
               </ul>
             </div>
             <div className="space-y-3">
@@ -76,10 +80,9 @@ export const NoveltyGauge = () => {
                 Prior Art Concerns
               </h4>
               <ul className="text-sm text-muted-foreground space-y-1 ml-4">
-                <li>• Basic topological qubits known</li>
-                <li>• Similar nanowire approaches exist</li>
-                <li>• Error correction widely studied</li>
-                <li>• Microsoft has related patents</li>
+                {overview.priorArtConcerns.map((aspect, idx) => (
+                  <li key={idx}>• {aspect}</li>
+                ))}
               </ul>
             </div>
           </div>
@@ -90,16 +93,12 @@ export const NoveltyGauge = () => {
           <h4 className="font-medium text-foreground">Supporting Evidence</h4>
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline" className="text-xs">
-              23 similar patents analyzed
+              {overview.supportingEvidence.numberDocumentsAnalyzed} documents
+              analyzed
             </Badge>
             <Badge variant="outline" className="text-xs">
-              156 publications reviewed
-            </Badge>
-            <Badge variant="outline" className="text-xs">
-              Semantic similarity: 0.72
-            </Badge>
-            <Badge variant="outline" className="text-xs">
-              Citation network depth: 3 levels
+              Semantic similarity:{" "}
+              {overview.supportingEvidence.avgSemanticSimilarity}
             </Badge>
           </div>
         </div>
