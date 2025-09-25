@@ -1,43 +1,42 @@
-from app.schemas import (
-    PublicationSimple, PublicationFull, Topic, Authorship, 
-    AuthorshipInstitution, Concept, Location, PublicationGroup,
-    Author
-)
-from dataclasses import dataclass
-from typing import List, Dict, Optional, Set
+from __future__ import annotations
+
+from typing import Any, Optional, List, Dict, Optional, Set
 from datetime import datetime
+import requests
+from dataclasses import dataclass
+from app.services.patent_scraping import parse_google_patent_html
 import pyalex
-from pyalex import Works, Authors
+from pyalex import Authors, Works
+from app.schemas import PublicationSimple, PublicationFull, Topic, Authorship, AuthorshipInstitution, Concept, Location, PublicationGroup, Author
+from typing import List
 
 # Configure PyAlex
 pyalex.config.email = "dt1999000@gmail.com"  # Replace with your email for proper attribution
 
-
-
-
 class ScrapingService:
-        
-    
-    def get_works_by_author(self, author_id: str, max_works: int = 5) -> List[PublicationFull]:
-        """
-        Get works by a specific author using PyAlex
-        
-        Args:
-            author_id (str): OpenAlex author ID, e.g., 'A1969205032'
-            max_works (int): Maximum number of works to retrieve
-        
-        Returns:
-            List[Publication]: List of structured publication information
-        """
-        author = Authors()[author_id]
-        works = author.works[:max_works]
-        
-        publications = []
-        for work in works:
-            pub = self.get_publication(work.id)
-            publications.append(pub)
-            
-        return publications
+    def __init__(self, timeout: int = 30) -> None:
+        self.timeout = timeout
+
+    def _fetch_html(self, url: str) -> str:
+        headers = {
+            "user-agent": (
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/127.0.0.0 Safari/537.36"
+            )
+        }
+        r = requests.get(url, headers=headers, timeout=self.timeout)
+        r.raise_for_status()
+        return r.text
+
+    def _build_patent_url(self, patent_id: str) -> str:
+        return f"https://patents.google.com/patent/{patent_id}"
+
+    def get_patent(self, patent_id: str) -> dict[str, Any]:
+        url = self._build_patent_url(patent_id)
+        html = self._fetch_html(url)
+        data = parse_google_patent_html(html, source_url=url)
+        return data
 
     def get_publication(self, work_id: str) -> PublicationFull:
         """
@@ -134,84 +133,25 @@ class ScrapingService:
             counts_by_year=work.get('counts_by_year', [])
         )
 
-    def group_publications(self, publications: List[PublicationFull], 
-                        by: str = 'field',
-                        min_concept_score: float = 0.5) -> Dict[str, PublicationGroup]:
+    def get_works_by_author(self, author_id: str, max_works: int = 5) -> List[PublicationFull]:
         """
-        Group publications by different criteria
+        Get works by a specific author using PyAlex
         
         Args:
-            publications (List[Publication]): List of publications to group
-            by (str): Grouping criterion: 'field', 'subfield', 'domain', 'author', or 'institution'
-            min_concept_score (float): Minimum concept score to consider (for field-based grouping)
+            author_id (str): OpenAlex author ID, e.g., 'A1969205032'
+            max_works (int): Maximum number of works to retrieve
         
         Returns:
-            Dict[str, PublicationGroup]: Publications grouped by the specified criterion
+            List[Publication]: List of structured publication information
         """
-        groups: Dict[str, List[PublicationFull]] = {}
+        author = Authors()[author_id]
+        works = author.works[:max_works]
         
-        for pub in publications:
-            if by in ['field', 'subfield', 'domain']:
-                # Get concepts at the appropriate level
-                level = 0 if by == 'domain' else 1 if by == 'field' else 2
-                relevant_concepts = [c for c in pub.concepts 
-                                if c.level == level and c.score >= min_concept_score]
-                
-                # A publication can belong to multiple groups
-                for concept in relevant_concepts:
-                    group_key = concept.display_name
-                    if group_key not in groups:
-                        groups[group_key] = []
-                    groups[group_key].append(pub)
-                    
-            elif by == 'author':
-                # Group by each author
-                for author in pub.authors:
-                    group_key = f"{author.display_name} ({author.id})"
-                    if group_key not in groups:
-                        groups[group_key] = []
-                    groups[group_key].append(pub)
-                    
-            elif by == 'institution':
-                # Group by each institution
-                for inst_id in pub.institutions:
-                    if inst_id not in groups:
-                        groups[inst_id] = []
-                    groups[inst_id].append(pub)
-        
-        # Convert to PublicationGroup objects with metrics
-        return {
-            key: PublicationGroup(
-                group_key=key,
-                publications=pubs,
-                total_citations=sum(p.citation_count for p in pubs),
-                publication_count=len(pubs)
-            )
-            for key, pubs in groups.items()
-        }
+        publications = []
+        for work in works:
+            pub = self.get_publication(work.id)
+            publications.append(pub)
+            
+        return publications
 
-    def get_related_publications(self, work_id: str, limit: int = 10) -> List[PublicationFull]:
-        """
-        Get publications related to a specific work using PyAlex's native related_works
-        
-        Args:
-            work_id (str): OpenAlex work ID, DOI, or URL
-            limit (int): Maximum number of related publications to retrieve
-        
-        Returns:
-            List[Publication]: List of related publications
-        """
-        # First get the original publication to get the related_works list
-        work = Works()[work_id]
-        related_ids = work.get('related_works', [])[:limit]
-        
-        # Fetch the related publications
-        related_publications = []
-        for related_id in related_ids:
-            try:
-                pub = self.get_publication(related_id)
-                related_publications.append(pub)
-            except Exception:
-                continue
-                
-        return related_publications
+
