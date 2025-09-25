@@ -9,14 +9,17 @@ import { SimilarWorks } from "./SimilarWorks";
 import { KeyPlayers } from "./KeyPlayers";
 import { LicensingMap } from "./LicensingMap";
 import { AttorneyBrief } from "./AttorneyBrief";
+import { DataResponse } from "@/api/types";
 
 interface ResultsWorkspaceProps {
   abstract: string;
+  res: DataResponse | null;
   onBack: () => void;
 }
 
 export const ResultsWorkspace = ({
   abstract,
+  res,
   onBack,
 }: ResultsWorkspaceProps) => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -106,7 +109,7 @@ export const ResultsWorkspace = ({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Novelty Gauge - Takes up 2 columns */}
               <div className="lg:col-span-2">
-                <NoveltyGauge />
+                <NoveltyGauge overview={res?.overview!} />
               </div>
 
               {/* Quick Actions */}
@@ -185,11 +188,10 @@ export const ResultsWorkspace = ({
                     <div className="w-4 h-4 bg-success rounded-full" />
                   </div>
                   <h4 className="font-semibold text-foreground">
-                    High Novelty
+                    {res?.overview.keyTakeaways.noveltyLevel} Novelty
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    Significant technical advancement over existing topological
-                    qubit approaches with novel error correction mechanisms.
+                    {res?.overview.keyTakeaways.noveltyReasoning}
                   </p>
                 </div>
                 <div className="space-y-3">
@@ -197,11 +199,11 @@ export const ResultsWorkspace = ({
                     <div className="w-4 h-4 bg-warning rounded-full" />
                   </div>
                   <h4 className="font-semibold text-foreground">
+                    {res?.overview.keyTakeaways.competitiveLandscapeLevel}{" "}
                     Competitive Landscape
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    Active research area with Microsoft, IBM, and Google holding
-                    key patents. Strategic positioning required.
+                    {res?.overview.keyTakeaways.competitiveLandscapeReasoning}
                   </p>
                 </div>
                 <div className="space-y-3">
@@ -209,11 +211,11 @@ export const ResultsWorkspace = ({
                     <div className="w-4 h-4 bg-primary rounded-full" />
                   </div>
                   <h4 className="font-semibold text-foreground">
+                    {res?.overview.keyTakeaways.licensingOpportunityLevel}{" "}
                     Licensing Opportunity
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    Strong potential for licensing to quantum computing
-                    companies seeking improved error correction.
+                    {res?.overview.keyTakeaways.licensingOpportunityReasoning}
                   </p>
                 </div>
               </div>
@@ -221,7 +223,10 @@ export const ResultsWorkspace = ({
           </TabsContent>
 
           <TabsContent value="similar-works">
-            <SimilarWorks onSelectionChange={setSelectedItems} />
+            <SimilarWorks
+              onSelectionChange={setSelectedItems}
+              similarWork={res?.similarWork!}
+            />
           </TabsContent>
 
           <TabsContent value="key-players">

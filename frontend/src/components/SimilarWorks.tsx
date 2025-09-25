@@ -12,102 +12,55 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ExternalLink, Plus, Search, Filter } from "lucide-react";
-
-interface Patent {
-  id: string;
-  title: string;
-  year: number;
-  assignee?: string;
-  relevance: number;
-  source: "patent" | "publication";
-  abstract: string;
-  authors?: string[];
-  publisher?: string;
-}
-
-const mockData: Patent[] = [
-  {
-    id: "US10789563B2",
-    title:
-      "Topological quantum computing with Majorana fermions in semiconductor nanowires",
-    year: 2023,
-    assignee: "Microsoft Corporation",
-    relevance: 0.89,
-    source: "patent",
-    abstract:
-      "Systems and methods for implementing quantum gates using topological qubits based on Majorana fermions...",
-  },
-  {
-    id: "US11234567B2",
-    title: "Error correction protocols for topological quantum systems",
-    year: 2022,
-    assignee: "IBM Corporation",
-    relevance: 0.84,
-    source: "patent",
-    abstract:
-      "Methods for quantum error correction in topological quantum computing architectures...",
-  },
-  {
-    id: "nature-2023-001",
-    title: "Scaling quantum error correction in topological systems",
-    year: 2023,
-    authors: ["Chen, L.", "Anderson, P.", "Kumar, S."],
-    publisher: "Nature Physics",
-    relevance: 0.81,
-    source: "publication",
-    abstract:
-      "We demonstrate scalable quantum error correction protocols for topological quantum computers...",
-  },
-  {
-    id: "US98765432B2",
-    title: "Semiconductor nanowire quantum devices with enhanced coherence",
-    year: 2021,
-    assignee: "Google LLC",
-    relevance: 0.76,
-    source: "patent",
-    abstract:
-      "Quantum computing devices utilizing semiconductor nanowires with improved coherence properties...",
-  },
-];
+import type { SimilarWorkResponse, RetrievedDocument } from "@/api/types";
 
 interface SimilarWorksProps {
   onSelectionChange: (selected: string[]) => void;
+  similarWork: SimilarWorkResponse;
 }
 
-export const SimilarWorks = ({ onSelectionChange }: SimilarWorksProps) => {
+export const SimilarWorks = ({
+  onSelectionChange,
+  similarWork,
+}: SimilarWorksProps) => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sourceFilter, setSourceFilter] = useState("all");
   const [minRelevance, setMinRelevance] = useState(0);
 
-  const filteredData = mockData.filter((item) => {
-    const matchesSearch =
-      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.assignee?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.authors?.some((author) =>
-        author.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    const matchesSource =
-      sourceFilter === "all" || item.source === sourceFilter;
-    const matchesRelevance = item.relevance >= minRelevance;
+  const filteredData = (similarWork.documents || []).filter(
+    (doc: RetrievedDocument) => {
+      const matchesSearch =
+        doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.institution?.some((inst) =>
+          inst.toLowerCase().includes(searchTerm.toLowerCase())
+        ) ||
+        doc.author?.some((author) =>
+          author.toLowerCase().includes(searchTerm.toLowerCase())
+        );
 
-    return matchesSearch && matchesSource && matchesRelevance;
-  });
+      const matchesSource = sourceFilter === "all" || doc.type === sourceFilter;
 
-  const handleItemSelect = (itemId: string, checked: boolean) => {
+      const matchesRelevance = doc.similarityScore >= minRelevance;
+
+      return matchesSearch && matchesSource && matchesRelevance;
+    }
+  );
+
+  const handleItemSelect = (id: string, checked: boolean) => {
     const newSelection = checked
-      ? [...selectedItems, itemId]
-      : selectedItems.filter((id) => id !== itemId);
+      ? [...selectedItems, id]
+      : selectedItems.filter((s) => s !== id);
 
     setSelectedItems(newSelection);
     onSelectionChange(newSelection);
   };
 
   const getRelevanceColor = (
-    relevance: number
-  ): "secondary" | "default" | "destructive" | "outline" => {
-    if (relevance >= 0.8) return "default";
-    if (relevance >= 0.6) return "secondary";
+    score: number
+  ): "secondary" | "default" | "outline" => {
+    if (score >= 0.8) return "default";
+    if (score >= 0.6) return "secondary";
     return "outline";
   };
 
@@ -119,7 +72,7 @@ export const SimilarWorks = ({ onSelectionChange }: SimilarWorksProps) => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
-              placeholder="Search titles, assignees..."
+              placeholder="Search titles, institutions, authors..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -160,13 +113,13 @@ export const SimilarWorks = ({ onSelectionChange }: SimilarWorksProps) => {
 
       {/* Results */}
       <div className="space-y-4">
-        {filteredData.map((item) => (
-          <Card key={item.id} className="research-card p-6 hover-lift">
+        {filteredData.map((doc) => (
+          <Card key={doc.id} className="research-card p-6 hover-lift">
             <div className="flex items-start space-x-4">
               <Checkbox
-                checked={selectedItems.includes(item.id)}
+                checked={selectedItems.includes(doc.id)}
                 onCheckedChange={(checked) =>
-                  handleItemSelect(item.id, checked as unknown as boolean)
+                  handleItemSelect(doc.id, checked as unknown as boolean)
                 }
                 className="mt-1"
               />
@@ -175,33 +128,30 @@ export const SimilarWorks = ({ onSelectionChange }: SimilarWorksProps) => {
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
                     <h3 className="font-semibold text-foreground leading-tight">
-                      {item.title}
+                      {doc.title}
                     </h3>
                     <div className="flex items-center space-x-4">
                       <Badge
                         variant={
-                          item.source === "patent" ? "default" : "secondary"
+                          doc.type === "patent" ? "default" : "secondary"
                         }
                       >
-                        {item.source === "patent" ? "Patent" : "Publication"}
+                        {doc.type === "patent" ? "Patent" : "Publication"}
                       </Badge>
-                      <span className="text-sm text-muted-foreground">
-                        {item.year}
-                      </span>
                       <span className="text-sm font-medium text-foreground">
-                        {item.source === "patent"
-                          ? item.assignee
-                          : item.authors?.join(", ")}
+                        {doc.type === "patent"
+                          ? doc.institution?.join(", ")
+                          : doc.author?.join(", ")}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-3">
                     <Badge
-                      variant={getRelevanceColor(item.relevance)}
+                      variant={getRelevanceColor(doc.similarityScore)}
                       className="text-sm"
                     >
-                      {Math.round(item.relevance * 100)}% match
+                      {Math.round(doc.similarityScore * 100)}% match
                     </Badge>
                     <Button size="sm" variant="ghost">
                       <ExternalLink className="w-4 h-4" />
@@ -210,19 +160,14 @@ export const SimilarWorks = ({ onSelectionChange }: SimilarWorksProps) => {
                 </div>
 
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {item.abstract}
+                  {doc.abstract}
                 </p>
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Badge variant="outline" className="text-xs">
-                      ID: {item.id}
+                      ID: {doc.id}
                     </Badge>
-                    {item.publisher && (
-                      <Badge variant="outline" className="text-xs">
-                        {item.publisher}
-                      </Badge>
-                    )}
                   </div>
 
                   <div className="flex items-center space-x-2">
