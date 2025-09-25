@@ -88,6 +88,7 @@ class PublicationFull(PublicationBase):
     referenced_works: List[str]
     related_works: List[str]
     counts_by_year: List[Dict]
+    fulltext: str
 
 class PublicationGroup(BaseModel):
     group_key: str

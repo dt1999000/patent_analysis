@@ -10,6 +10,7 @@ from pyalex import Authors, Works
 from app.schemas import PublicationBase, PublicationFull, Topic, Authorship, AuthorshipInstitution, Concept, Location, PublicationGroup, Author
 from typing import List
 
+
 # Configure PyAlex
 pyalex.config.email = "dt1999000@gmail.com"  # Replace with your email for proper attribution
 
@@ -130,7 +131,8 @@ class ScrapingService:
             concepts=concepts,
             referenced_works=work.get('referenced_works', []),
             related_works=work.get('related_works', []),
-            counts_by_year=work.get('counts_by_year', [])
+            counts_by_year=work.get('counts_by_year', []),
+            fulltext=("<fulltext>")
         )
 
     def get_works_by_author(self, author_id: str, max_works: int = 5) -> List[PublicationBase]:
@@ -153,5 +155,6 @@ class ScrapingService:
             publications.append(pub)
             
         return publications
-
+    
+    
 
