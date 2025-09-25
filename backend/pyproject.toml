@@ -24,6 +24,8 @@ dependencies = [
     "pyalex>=0.18",
     "urllib3>=2.2.3",
     "requests>=2.32.3",
+    "llama-index-llms-anthropic>=0.9.1",
+    "networkx>=3.3",
 ]
 
 [tool.uv]
