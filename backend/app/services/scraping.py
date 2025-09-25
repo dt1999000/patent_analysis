@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from app.services.patent_scraping import parse_google_patent_html
 import pyalex
 from pyalex import Authors, Works
-from app.schemas import PublicationSimple, PublicationFull, Topic, Authorship, AuthorshipInstitution, Concept, Location, PublicationGroup, Author
+from app.schemas import PublicationBase, PublicationFull, Topic, Authorship, AuthorshipInstitution, Concept, Location, PublicationGroup, Author
 from typing import List
 
 # Configure PyAlex
@@ -38,7 +38,7 @@ class ScrapingService:
         data = parse_google_patent_html(html, source_url=url)
         return data
 
-    def get_publication(self, work_id: str) -> PublicationFull:
+    def get_publication(self, work_id: str) -> PublicationBase:
         """
         Get detailed information about a single publication from OpenAlex API using PyAlex
         
@@ -133,7 +133,7 @@ class ScrapingService:
             counts_by_year=work.get('counts_by_year', [])
         )
 
-    def get_works_by_author(self, author_id: str, max_works: int = 5) -> List[PublicationFull]:
+    def get_works_by_author(self, author_id: str, max_works: int = 5) -> List[PublicationBase]:
         """
         Get works by a specific author using PyAlex
         

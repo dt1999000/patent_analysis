@@ -71,12 +71,12 @@ class PublicationContentBreakdown(BaseModel):
     methods: Optional[str]
     conclusions: Optional[str]
 
-class PublicationSimple(BaseModel):
+class PublicationBase(BaseModel):
     id: str
     title: str
     abstract: Optional[str]
 
-class PublicationFull(PublicationSimple):
+class PublicationFull(PublicationBase):
     cited_by_count: int
     is_retracted: bool
     is_paratext: bool

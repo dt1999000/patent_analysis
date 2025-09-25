@@ -3,7 +3,6 @@ from typing import Annotated
 
 from app.services.retrieval import Retrieval, BaseRetrieval
 from app.services.scraping import ScrapingService
-from app.services.scraping import ScrapingService
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
