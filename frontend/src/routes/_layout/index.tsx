@@ -6,7 +6,7 @@ import { mockDocuments } from "@/components/Graph/mockDocs"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
-})
+});
 
 function Dashboard() {
   return (
@@ -15,5 +15,5 @@ function Dashboard() {
         <ForceGraph documents={mockDocuments} />
       </Box>
     </Container>
-  )
+  );
 }

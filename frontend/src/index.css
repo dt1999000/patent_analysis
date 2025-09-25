@@ -1,0 +1,377 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Professional Research-Grade Design System
+All colors MUST be HSL. Sophisticated, calm, credible aesthetic.
+*/
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+Pro:wght@400;600&display=swap");
+
+@layer base {
+  :root {
+    /* Professional Background & Surfaces */
+    --background: 0 0% 99%;
+    --surface: 0 0% 100%;
+    --surface-elevated: 0 0% 100%;
+    --foreground: 215 25% 15%;
+
+    /* Card & Paper Elements */
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    /* Overlays & Popovers */
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    /* Primary Brand - Sophisticated Research Blue */
+    --primary: 217 91% 60%;
+    --primary-hover: 217 91% 55%;
+    --primary-active: 217 91% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-muted: 217 45% 95%;
+
+    /* Secondary - Complementary Teal */
+    --secondary: 195 85% 65%;
+    --secondary-hover: 195 85% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-muted: 195 50% 95%;
+
+    /* Neutral Tones */
+    --muted: 215 20% 96%;
+    --muted-hover: 215 20% 92%;
+    --muted-foreground: 215 15% 45%;
+
+    /* Accent - Warm Success */
+    --accent: 158 64% 52%;
+    --accent-hover: 158 64% 47%;
+    --accent-foreground: 0 0% 100%;
+    --accent-muted: 158 40% 95%;
+
+    /* Status Colors */
+    --success: 158 64% 52%;
+    --success-foreground: 0 0% 100%;
+    --success-muted: 158 40% 95%;
+
+    --warning: 43 96% 56%;
+    --warning-foreground: 215 25% 15%;
+    --warning-muted: 43 50% 95%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-muted: 0 50% 95%;
+
+    /* Interactive Elements */
+    --border: 215 20% 88%;
+    --border-hover: 215 25% 80%;
+    --input: 215 20% 94%;
+    --input-focus: 217 91% 60%;
+    --ring: 217 91% 60%;
+
+    /* Shadows & Depth */
+    --shadow-sm: 0 1px 2px 0 hsl(215 25% 15% / 0.05);
+    --shadow-md:
+      0 4px 6px -1px hsl(215 25% 15% / 0.1),
+      0 2px 4px -1px hsl(215 25% 15% / 0.06);
+    --shadow-lg:
+      0 10px 15px -3px hsl(215 25% 15% / 0.1),
+      0 4px 6px -2px hsl(215 25% 15% / 0.05);
+    --shadow-xl:
+      0 20px 25px -5px hsl(215 25% 15% / 0.1),
+      0 10px 10px -5px hsl(215 25% 15% / 0.04);
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--secondary)) 100%
+    );
+    --gradient-subtle: linear-gradient(
+      135deg,
+      hsl(var(--surface)) 0%,
+      hsl(var(--muted)) 100%
+    );
+    --gradient-glow: radial-gradient(
+      circle at center,
+      hsl(var(--primary) / 0.15) 0%,
+      transparent 65%
+    );
+
+    /* Typography Scale */
+    --font-family-sans:
+      "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-family-serif: "Source Serif Pro", Georgia, serif;
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Dark Professional Background & Surfaces */
+    --background: 215 28% 6%;
+    --surface: 215 25% 8%;
+    --surface-elevated: 215 25% 10%;
+    --foreground: 215 20% 95%;
+
+    /* Dark Card & Paper Elements */
+    --card: 215 25% 8%;
+    --card-foreground: 215 20% 95%;
+
+    /* Dark Overlays & Popovers */
+    --popover: 215 25% 8%;
+    --popover-foreground: 215 20% 95%;
+
+    /* Dark Primary Brand */
+    --primary: 217 91% 65%;
+    --primary-hover: 217 91% 70%;
+    --primary-active: 217 91% 75%;
+    --primary-foreground: 215 25% 8%;
+    --primary-muted: 217 45% 12%;
+
+    /* Dark Secondary */
+    --secondary: 195 85% 70%;
+    --secondary-hover: 195 85% 75%;
+    --secondary-foreground: 215 25% 8%;
+    --secondary-muted: 195 50% 12%;
+
+    /* Dark Neutral Tones */
+    --muted: 215 25% 12%;
+    --muted-hover: 215 25% 15%;
+    --muted-foreground: 215 15% 65%;
+
+    /* Dark Accent */
+    --accent: 158 64% 57%;
+    --accent-hover: 158 64% 62%;
+    --accent-foreground: 215 25% 8%;
+    --accent-muted: 158 40% 12%;
+
+    /* Dark Status Colors */
+    --success: 158 64% 57%;
+    --success-foreground: 215 25% 8%;
+    --success-muted: 158 40% 12%;
+
+    --warning: 43 96% 61%;
+    --warning-foreground: 215 25% 8%;
+    --warning-muted: 43 50% 12%;
+
+    --destructive: 0 84% 65%;
+    --destructive-foreground: 215 25% 8%;
+    --destructive-muted: 0 50% 12%;
+
+    /* Dark Interactive Elements */
+    --border: 215 25% 18%;
+    --border-hover: 215 25% 25%;
+    --input: 215 25% 12%;
+    --input-focus: 217 91% 65%;
+    --ring: 217 91% 65%;
+
+    /* Dark Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(215 28% 4% / 0.3);
+    --shadow-md:
+      0 4px 6px -1px hsl(215 28% 4% / 0.4), 0 2px 4px -1px hsl(215 28% 4% / 0.2);
+    --shadow-lg:
+      0 10px 15px -3px hsl(215 28% 4% / 0.4),
+      0 4px 6px -2px hsl(215 28% 4% / 0.2);
+    --shadow-xl:
+      0 20px 25px -5px hsl(215 28% 4% / 0.5),
+      0 10px 10px -5px hsl(215 28% 4% / 0.3);
+
+    /* Dark Gradients */
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--secondary)) 100%
+    );
+    --gradient-subtle: linear-gradient(
+      135deg,
+      hsl(var(--surface)) 0%,
+      hsl(var(--muted)) 100%
+    );
+    --gradient-glow: radial-gradient(
+      circle at center,
+      hsl(var(--primary) / 0.2) 0%,
+      transparent 65%
+    );
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold text-balance;
+  }
+}
+
+@layer components {
+  /* Professional Research Cards */
+  .research-card {
+    @apply bg-card text-card-foreground rounded-xl border border-border/50 shadow-md hover:shadow-lg transition-all duration-300;
+  }
+
+  .research-card-elevated {
+    @apply research-card shadow-lg hover:shadow-xl;
+  }
+
+  /* Professional Gradients */
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-subtle {
+    background: var(--gradient-subtle);
+  }
+
+  .gradient-glow {
+    background: var(--gradient-glow);
+  }
+
+  /* Professional Buttons */
+  .btn-professional {
+    @apply inline-flex items-center justify-center rounded-lg text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn-professional bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:shadow-md;
+  }
+
+  .btn-secondary {
+    @apply btn-professional bg-secondary text-secondary-foreground hover:bg-secondary/90;
+  }
+
+  /* Research-Grade Typography */
+  .text-research-title {
+    @apply text-2xl font-semibold text-foreground leading-tight;
+  }
+
+  .text-research-subtitle {
+    @apply text-lg font-medium text-muted-foreground;
+  }
+
+  .text-research-body {
+    @apply text-base text-foreground leading-relaxed;
+  }
+
+  .text-serif {
+    font-family: var(--font-family-serif);
+  }
+
+  /* Professional Animations */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+
+  /* Interactive Elements */
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-1;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/25;
+  }
+}
+
+@layer utilities {
+  /* Custom Shadows using Design System */
+  .shadow-research {
+    box-shadow: var(--shadow-md);
+  }
+
+  .shadow-research-lg {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .shadow-research-xl {
+    box-shadow: var(--shadow-xl);
+  }
+
+  /* Professional Spacing */
+  .section-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .content-width {
+    @apply max-w-7xl mx-auto;
+  }
+
+  /* Research-Grade Animations */
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+
+  .transition-fast {
+    transition: var(--transition-fast);
+  }
+}
+
+/* Keyframe Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
