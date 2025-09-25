@@ -94,3 +94,16 @@ class PublicationGroup(BaseModel):
     publications: List[PublicationFull]
     total_citations: int
     publication_count: int
+
+
+
+class Patent(BaseModel):
+    id: str | None
+    url: str | None
+    title: str | None
+    abstract: str | None
+    description: str | None
+    claims: str | None
+    authors: list[str]
+    pdf_url: str | None
+    meta: dict
