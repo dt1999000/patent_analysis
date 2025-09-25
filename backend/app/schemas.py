@@ -108,3 +108,4 @@ class Patent(BaseModel):
     authors: list[str]
     pdf_url: str | None
     meta: dict
+    fulltext: str
