@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { Landing } from "@/components/Landing";
 import { ResultsWorkspace } from "@/components/ResultsWorkspace";
+import { DataResponse } from "@/api/types";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<"landing" | "results">(
     "landing"
   );
-  const [analysisData, setAnalysisData] = useState<string>("");
+  const [analysisData, setAnalysisData] = useState<DataResponse | null>(null);
+  const [abstract, setAbstract] = useState<string>("");
 
-  const handleAnalyze = (abstract: string) => {
-    setAnalysisData(abstract);
+  const handleAnalyze = (abstract: string, res: DataResponse) => {
+    setAbstract(abstract);
+    setAnalysisData(res);
     setCurrentView("results");
   };
 
@@ -21,7 +24,11 @@ const Index = () => {
     <>
       {currentView === "landing" && <Landing onAnalyze={handleAnalyze} />}
       {currentView === "results" && (
-        <ResultsWorkspace abstract={analysisData} onBack={handleBack} />
+        <ResultsWorkspace
+          abstract={abstract}
+          res={analysisData}
+          onBack={handleBack}
+        />
       )}
     </>
   );

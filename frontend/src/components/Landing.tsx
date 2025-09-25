@@ -11,9 +11,11 @@ import {
   Download,
   Sparkles,
 } from "lucide-react";
+import { analyzeResearch } from "@/api";
+import type { DataResponse } from "@/api/types";
 
 interface LandingProps {
-  onAnalyze: (abstract: string) => void;
+  onAnalyze: (abstract: string, res: DataResponse) => void;
 }
 
 const sampleAbstract = `We present a novel approach to quantum error correction using topological qubits based on Majorana fermions in semiconductor nanowires. Our method achieves significantly higher error thresholds compared to conventional surface codes while maintaining scalability for large-scale quantum computing architectures. The implementation demonstrates a 10x improvement in coherence times and establishes a pathway toward fault-tolerant quantum computation.`;
@@ -25,10 +27,15 @@ export const Landing = ({ onAnalyze }: LandingProps) => {
   const handleAnalyze = async () => {
     if (!abstract.trim()) return;
     setIsLoading(true);
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    onAnalyze(abstract);
-    setIsLoading(false);
+
+    try {
+      const data: DataResponse = await analyzeResearch({ query: abstract });
+      onAnalyze(abstract, data);
+    } catch (err) {
+      console.error("API error", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleTrySample = () => {
