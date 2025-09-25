@@ -141,6 +141,7 @@ def parse_google_patent_html(html: str, source_url: Optional[str] = None) -> dic
         "authors": authors,
         "pdf_url": pdf_url,
         "meta": meta,
+        "fulltext": abstract +description+ claims
     }
 
 

@@ -71,12 +71,12 @@ class PublicationContentBreakdown(BaseModel):
     methods: Optional[str]
     conclusions: Optional[str]
 
-class PublicationSimple(BaseModel):
+class PublicationBase(BaseModel):
     id: str
     title: str
     abstract: Optional[str]
 
-class PublicationFull(PublicationSimple):
+class PublicationFull(PublicationBase):
     cited_by_count: int
     is_retracted: bool
     is_paratext: bool
@@ -88,6 +88,7 @@ class PublicationFull(PublicationSimple):
     referenced_works: List[str]
     related_works: List[str]
     counts_by_year: List[Dict]
+    fulltext: str
 
 class PublicationGroup(BaseModel):
     group_key: str
@@ -107,3 +108,4 @@ class Patent(BaseModel):
     authors: list[str]
     pdf_url: str | None
     meta: dict
+    fulltext: str

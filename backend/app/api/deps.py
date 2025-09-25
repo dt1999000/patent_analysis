@@ -3,7 +3,6 @@ from typing import Annotated
 
 from app.services.retrieval import Retrieval, BaseRetrieval
 from app.services.scraping import ScrapingService
-from app.services.scraping import ScrapingService
 from app.services.llm import BaseLLMService
 from app.services.analyze.analyze import BaseAnalyzeService, AnalyzeService
 import jwt
