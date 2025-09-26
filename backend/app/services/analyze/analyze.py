@@ -8,6 +8,9 @@ from app.services.analyze.prompts import get_analyze_topic_prompt
 from pydantic import BaseModel, Field
 from app.services.analyze.prompts import get_topic_refinement_prompt, get_author_refinement_prompt, get_institution_refinement_prompt
 from app.services.ingest import IngestedDocument
+from app.services.analyze.prompts import get_find_relevant_assignees_prompt, get_find_relevant_industries_prompt, get_estimate_impact_prompt
+
+
 from app.services.retrieval import BaseRetrieval
 from app.schemas import LogicMillQuery, NoveltyAssessmentResponse
 
@@ -87,9 +90,13 @@ class BaseAnalyzeService(AnalyzeService):
     def analyze_topics(self, documents: List[IngestedDocument]) -> List[IngestedDocument]:
         docs = []
         for document in documents:
-            analyzed: DocumentTopics = self.analyze_topic(document.full_text)
-            # Keep only the list for downstream pydantic models
-            document.topics = analyzed.topics
+            try:
+                analyzed: DocumentTopics = self.analyze_topic(document.full_text)
+                # Keep only the list for downstream pydantic models
+                document.topics = analyzed.topics
+            except Exception as e:
+                print(f"Error analyzing topics: {e}")
+                document.topics = []
             docs.append(document)
         return docs
 
@@ -452,7 +459,28 @@ class BaseAnalyzeService(AnalyzeService):
     def assess_impact(self, text: str, documents: List[IngestedDocument]) -> str:
         # LLM to search for the impact of the paper on that domain/industry
         # Then findout which products/ideas might be affected by the paper
-        pass
+        class ImpactedAssignees(BaseModel):
+            assignees: List[str]
+
+        class ImpactedIndustries(BaseModel):
+            industries: List[str]
+
+        class EstimatedImpact(BaseModel):
+            impact_reasoning: str
+            market_segment: str
+
+        assignees = [document.institutions for document in documents]
+
+        relevant_assignees_prompt = get_find_relevant_assignees_prompt(text, assignees)
+        impacted_assignees: ImpactedAssignees = self.llm_service.structured_complete(relevant_assignees_prompt, ImpactedAssignees)
+
+        relevant_industries_prompt = get_find_relevant_industries_prompt(text, impacted_assignees.assignees)
+        impacted_industries: ImpactedIndustries = self.llm_service.structured_complete(relevant_industries_prompt, ImpactedIndustries)
+
+        estimated_impact_prompt = get_estimate_impact_prompt(text, impacted_industries.industries)
+        estimated_impact: EstimatedImpact = self.llm_service.structured_complete(estimated_impact_prompt, EstimatedImpact)
+
+        return estimated_impact
 
     def assess_marketability(self, text: str, documents: List[IngestedDocument]) -> str:
         # Combine novelty, impact to assess the marketability of the paper
