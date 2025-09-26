@@ -5,6 +5,7 @@ from app.services.retrieval import Retrieval, BaseRetrieval
 from app.services.scraping import ScrapingService
 from app.services.llm import BaseLLMService
 from app.services.analyze.analyze import BaseAnalyzeService, AnalyzeService
+from app.services.ingest import IngestService
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -72,3 +73,6 @@ def get_llm_service() -> BaseLLMService:
 
 def get_analyze_service(llm_service: BaseLLMService = Depends(get_llm_service)) -> AnalyzeService:
     return BaseAnalyzeService(llm_service) 
+
+def get_ingest_service(retrieval_service: Retrieval = Depends(get_retrieval_service), scraping_service: ScrapingService = Depends(get_scraping_service)) -> IngestService:
+    return IngestService(retrieval_service, scraping_service)
