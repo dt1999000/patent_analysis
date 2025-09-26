@@ -438,13 +438,12 @@ class BaseAnalyzeService(AnalyzeService):
     def assess_novelty(self, text: str) -> NoveltyAssessmentResponse:
         # Use the similarity score to assess the novelty of the paper
         retrieval_service = BaseRetrieval()
-        retrieved_documents = retrieval_service.retrieve(LogicMillQuery(title=text, abstract=text, amount=50, model="patspecter"))
+        retrieved_documents = retrieval_service.retrieve(LogicMillQuery(title="", abstract=text, amount=50, model="patspecter"))
         average_score = 0
         highest_similarity_score = 0
         if retrieved_documents is None:
             return NoveltyAssessmentResponse(novelty_assesment="No documents found", highest_similarity_score=1, average_similarity_score=1, document_count=0)
         for document in retrieved_documents.response:
-            print(document.score)
             average_score += document.score
             highest_similarity_score = max(highest_similarity_score, document.score)
         average_score /= len(retrieved_documents.response)
