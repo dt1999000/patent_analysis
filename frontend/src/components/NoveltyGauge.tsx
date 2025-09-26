@@ -46,8 +46,8 @@ export const NoveltyGauge = ({ overview }: NoveltyGaugeProps) => {
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <div className="text-sm font-medium text-muted-foreground">
-                  {novelty.level} Novelty
+                <div className={`text-3xl font-bold text-${novelty.color}`}>
+                  {noveltyScore}%
                 </div>
               </div>
             </div>

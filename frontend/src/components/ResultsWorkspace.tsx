@@ -123,28 +123,22 @@ export const ResultsWorkspace = ({
                       variant="secondary"
                       className="w-full justify-start p-3"
                     >
-                      <div className={`w-3 h-3 rounded-full mr-3 ${
-                        res?.overview.keyTakeaways.noveltyLevel === "High" ? "bg-success" :
-                        res?.overview.keyTakeaways.noveltyLevel === "Medium" ? "bg-warning" : "bg-destructive"
-                      }`} />
-                      {res?.overview.keyTakeaways.noveltyLevel || "Unknown"} novelty potential
+                      <div className="w-3 h-3 bg-success rounded-full mr-3" />
+                      High novelty potential
                     </Badge>
                     <Badge
                       variant="secondary"
                       className="w-full justify-start p-3"
                     >
-                      <div className={`w-3 h-3 rounded-full mr-3 ${
-                        res?.overview.keyTakeaways.competitiveLandscapeLevel === "High" ? "bg-warning" :
-                        res?.overview.keyTakeaways.competitiveLandscapeLevel === "Medium" ? "bg-secondary" : "bg-success"
-                      }`} />
-                      {res?.overview.keyTakeaways.competitiveLandscapeLevel || "Unknown"} competitive landscape
+                      <div className="w-3 h-3 bg-warning rounded-full mr-3" />
+                      Emerging field cluster
                     </Badge>
                     <Badge
                       variant="secondary"
                       className="w-full justify-start p-3"
                     >
                       <div className="w-3 h-3 bg-primary rounded-full mr-3" />
-                      {res?.overview.supportingEvidence.numberDocumentsAnalyzed || 0} documents analyzed
+                      23 similar patents found
                     </Badge>
                   </div>
                 </Card>

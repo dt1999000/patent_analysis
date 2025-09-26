@@ -1,19 +1,10 @@
-import { Box, Container } from "@chakra-ui/react"
-import { createFileRoute } from "@tanstack/react-router"
-
-import ForceGraph from "@/components/Graph/ForceGraph"
-import { mockDocuments } from "@/components/Graph/mockDocs"
+import { createFileRoute } from "@tanstack/react-router";
+import Index from "@/components/pages/Index";
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
 });
 
 function Dashboard() {
-  return (
-    <Container maxW="full">
-      <Box pt={6} m={4}>
-        <ForceGraph documents={mockDocuments} />
-      </Box>
-    </Container>
-  );
+  return <Index />;
 }
