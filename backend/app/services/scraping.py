@@ -28,7 +28,14 @@ class ScrapingService:
         }
         r = requests.get(url, headers=headers, timeout=self.timeout)
         r.raise_for_status()
-        return r.text
+        # Prefer decoding bytes as UTF-8 (Google Patents and OpenAlex use UTF-8).
+        # Fall back to requests' detected encoding to avoid mojibake.
+        try:
+            html = r.content.decode("utf-8")
+        except UnicodeDecodeError:
+            encoding = getattr(r, "apparent_encoding", None) or r.encoding or "utf-8"
+            html = r.content.decode(encoding, errors="replace")
+        return html
 
     def _build_patent_url(self, patent_id: str) -> str:
         return f"https://patents.google.com/patent/{patent_id}"
