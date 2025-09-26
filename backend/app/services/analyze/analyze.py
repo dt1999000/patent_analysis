@@ -84,14 +84,13 @@ class BaseAnalyzeService(AnalyzeService):
     def analyze_topics(self, documents: List[IngestedDocument]) -> List[IngestedDocument]:
         docs = []
         for document in documents:
-            document.topics = self.analyze_topic(document.full_text)
+            analyzed: DocumentTopics = self.analyze_topic(document.full_text)
+            # Keep only the list for downstream pydantic models
+            document.topics = analyzed.topics
             docs.append(document)
         return docs
 
     def refine_topics(self, documents: List[IngestedDocument]) -> List[IngestedDocument]:
-        # Placeholder refinement using identity mappings to ensure safe processing.
-        topic_mapping: Dict[str, str] = {}
-        subtopic_mapping: Dict[str, str] = {}
 
         # for document in documents:
         #     if not document.topics:
@@ -101,20 +100,78 @@ class BaseAnalyzeService(AnalyzeService):
         #         topic.subtopics = [subtopic_mapping.get(s, s) for s in topic.subtopics]
         # return documents
 
-        topic_refinement_prompt = get_topic_refinement_prompt(documents)
-        refined_documents = self.llm_service.structured_complete(topic_refinement_prompt, List[IngestedDocument])
-        return refined_documents
+        documents = self.analyze_topics(documents)
+
+        class SlimTopicDocument(BaseModel):
+            id: str
+            topics: List[Topic]
+
+        class SlimTopicDocumentList(BaseModel):
+            documents: List[SlimTopicDocument]
+
+        payload = SlimTopicDocumentList(
+            documents=[SlimTopicDocument(id=document.id, topics=document.topics) for document in documents]
+        )
+
+        topic_refinement_prompt = get_topic_refinement_prompt(payload.documents)
+        refined: SlimTopicDocumentList = self.llm_service.structured_complete(
+            topic_refinement_prompt, SlimTopicDocumentList
+        )
+        # Build lookup to update original list by id
+        id_to_index = {doc.id: idx for idx, doc in enumerate(documents)}
+        for doc in refined.documents:
+            if doc.id in id_to_index:
+                documents[id_to_index[doc.id]].topics = list(doc.topics)
+        return documents
 
     def refine_authors(self, documents: List[IngestedDocument]) -> List[IngestedDocument]:
-        author_refinement_prompt = get_author_refinement_prompt(documents)
-        refined_documents = self.llm_service.structured_complete(author_refinement_prompt, List[IngestedDocument])
-        return refined_documents
+        class SlimAuthorDocument(BaseModel):
+            id: str
+            authors: List[str]
+
+        class SlimAuthorDocumentList(BaseModel):
+            documents: List[SlimAuthorDocument]
+
+        payload = SlimAuthorDocumentList(
+            documents=[SlimAuthorDocument(id=document.id, authors=document.authors) for document in documents]
+        )
+        author_refinement_prompt = get_author_refinement_prompt(payload.documents)
+        try:
+            refined: SlimAuthorDocumentList = self.llm_service.structured_complete(
+                author_refinement_prompt, SlimAuthorDocumentList
+            )
+        except Exception as e:
+            print(f"Error refining authors: {e}")
+            return documents
+        id_to_index = {doc.id: idx for idx, doc in enumerate(documents)}
+        for doc in refined.documents:
+            if doc.id in id_to_index:
+                documents[id_to_index[doc.id]].authors = list(doc.authors)
+        return documents
 
     def refine_institutions(self, documents: List[IngestedDocument]) -> List[IngestedDocument]:
+        class SlimInstitutionDocument(BaseModel):
+            id: str
+            institutions: List[str]
 
-        institution_refinement_prompt = get_institution_refinement_prompt(documents)
-        refined_documents = self.llm_service.structured_complete(institution_refinement_prompt, List[IngestedDocument])
-        return refined_documents
+        class SlimInstitutionDocumentList(BaseModel):
+            documents: List[SlimInstitutionDocument]
+
+        payload = SlimInstitutionDocumentList(
+            documents=[
+                SlimInstitutionDocument(id=document.id, institutions=document.institutions)
+                for document in documents
+            ]
+        )
+        institution_refinement_prompt = get_institution_refinement_prompt(payload.documents)
+        refined: SlimInstitutionDocumentList = self.llm_service.structured_complete(
+            institution_refinement_prompt, SlimInstitutionDocumentList
+        )
+        id_to_index = {doc.id: idx for idx, doc in enumerate(documents)}
+        for doc in refined.documents:
+            if doc.id in id_to_index:
+                documents[id_to_index[doc.id]].institutions = list(doc.institutions)
+        return documents
 
     def refine_documents(self, documents: List[IngestedDocument]) -> List[IngestedDocument]:
         docs = self.refine_topics(documents)
