@@ -131,6 +131,10 @@ def parse_google_patent_html(html: str, source_url: Optional[str] = None) -> dic
     pub_id = _extract_publication_id(html)
     url = source_url or _extract_canonical_url(html)
 
+    fulltext = abstract if abstract else ""
+    fulltext += description if description else ""
+    fulltext += claims if claims else ""
+
     return {
         "id": pub_id,
         "url": url,
@@ -141,7 +145,7 @@ def parse_google_patent_html(html: str, source_url: Optional[str] = None) -> dic
         "authors": authors,
         "pdf_url": pdf_url,
         "meta": meta,
-        "fulltext": abstract +description+ claims
+        "fulltext": fulltext
     }
 
 

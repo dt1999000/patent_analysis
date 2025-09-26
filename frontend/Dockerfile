@@ -4,6 +4,8 @@ FROM node:24 AS build-stage
 WORKDIR /app
 
 COPY package*.json /app/
+RUN npm install esbuild
+RUN npm install --save-dev @types/d3
 
 RUN npm install
 

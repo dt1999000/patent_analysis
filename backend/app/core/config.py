@@ -117,6 +117,7 @@ class Settings(BaseSettings):
 
     LOGIC_MILL_TOKEN: str
     LOGIC_MILL_URL: str
+    ANTHROPIC_API_KEY: str
 
 
 settings = Settings()  # type: ignore
