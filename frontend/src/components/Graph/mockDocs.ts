@@ -70,6 +70,94 @@ export const mockDocuments = [
       },
     ],
   },
+  {
+    id: "PUB-004",
+    type: "Publication",
+    authors: ["Arjun Gupta", "Maria Rossi"],
+    institutions: ["MIT", "IBM Quantum"],
+    full_text:
+      "Improved coherence in semiconductor nanowire devices using epitaxial superconductors.",
+    topics: [
+      { topic: "Quantum Hardware", subtopics: ["Coherence", "Nanowires"] },
+    ],
+  },
+  {
+    id: "PAT-003",
+    type: "Patent",
+    authors: ["Chen Liu", "Peter Anderson"],
+    institutions: ["MIT", "Stanford University"],
+    full_text:
+      "Topological qubit braiding controller with adaptive timing for error mitigation.",
+    topics: [
+      { topic: "Topological Quantum Computing", subtopics: ["Braiding", "Control"] },
+    ],
+  },
+  {
+    id: "PUB-005",
+    type: "Publication",
+    authors: ["Anna Kim", "S. Kumar"],
+    institutions: ["Stanford University", "University of Copenhagen"],
+    full_text:
+      "Error thresholds for surface codes in presence of correlated noise in nanowire-based qubits.",
+    topics: [
+      { topic: "Quantum Error Correction", subtopics: ["Surface codes", "Noise models"] },
+    ],
+  },
+  {
+    id: "PAT-004",
+    type: "Patent",
+    authors: ["Maria Rossi", "Takashi Ito"],
+    institutions: ["IBM Quantum", "Microsoft Research"],
+    full_text:
+      "Readout multiplexers for large-scale cryogenic control in superconducting circuits.",
+    topics: [
+      { topic: "Quantum Hardware", subtopics: ["Readout", "Cryogenics"] },
+    ],
+  },
+  {
+    id: "PUB-006",
+    type: "Publication",
+    authors: ["S. Kumar", "Guillermo Santos"],
+    institutions: ["University of Copenhagen", "MIT"],
+    full_text:
+      "Scaling quantum error correction with modular nanowire networks.",
+    topics: [
+      { topic: "Quantum Computing", subtopics: ["Modular architectures", "Networks"] },
+    ],
+  },
+  {
+    id: "PAT-005",
+    type: "Patent",
+    authors: ["Peter Anderson"],
+    institutions: ["Stanford University"],
+    full_text:
+      "A nanowire junction device enabling robust Majorana zero modes for qubit initialization.",
+    topics: [
+      { topic: "Condensed Matter Physics", subtopics: ["Majorana zero modes", "Nanowires"] },
+    ],
+  },
+  {
+    id: "PUB-007",
+    type: "Publication",
+    authors: ["Chen Liu", "Anna Kim"],
+    institutions: ["MIT", "Stanford University"],
+    full_text:
+      "Hybrid semiconductor–superconductor platforms for fault-tolerant topological quantum computation.",
+    topics: [
+      { topic: "Topological Quantum Computing", subtopics: ["Hybrid platforms", "Fault tolerance"] },
+    ],
+  },
+  {
+    id: "PAT-006",
+    type: "Patent",
+    authors: ["Takashi Ito"],
+    institutions: ["Microsoft Research"],
+    full_text:
+      "On-chip cryo-amplifiers for low-noise readout of topological qubits.",
+    topics: [
+      { topic: "Quantum Hardware", subtopics: ["Cryo-amplifiers", "Low-noise readout"] },
+    ],
+  },
 ]
 
 

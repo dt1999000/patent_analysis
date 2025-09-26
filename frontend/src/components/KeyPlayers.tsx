@@ -1,7 +1,16 @@
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DialogRoot,
+  DialogContent,
+  DialogBody,
+  DialogBackdrop,
+  DialogCloseTrigger,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Building2,
   User,
@@ -9,6 +18,8 @@ import {
   ExternalLink,
   Network,
 } from "lucide-react";
+import ForceGraph from "@/components/Graph/ForceGraph";
+import { mockDocuments } from "@/components/Graph/mockDocs";
 
 interface Player {
   id: string;
@@ -82,6 +93,69 @@ const mockPlayers: Player[] = [
 ];
 
 export const KeyPlayers = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const open = () => setIsOpen(true);
+
+  // Derive statistics from mock documents for a more factual view
+  const stats = useMemo(() => {
+    const authors = new Map<string, number>();
+    const institutions = new Map<string, number>();
+    let collaborations = 0;
+
+    for (const d of mockDocuments) {
+      // count authors and pairwise collaborations per document
+      for (const a of d.authors) {
+        authors.set(a, (authors.get(a) || 0) + 1);
+      }
+      for (let i = 0; i < d.authors.length; i++) {
+        for (let j = i + 1; j < d.authors.length; j++) collaborations += 1;
+      }
+      for (const inst of d.institutions) {
+        if (!inst) continue;
+        institutions.set(inst, (institutions.get(inst) || 0) + 1);
+      }
+    }
+
+    const activePlayers = new Set<string>([
+      ...authors.keys(),
+      ...institutions.keys(),
+    ]).size;
+
+    // Build top players list from counts
+    const topInstitutions = [...institutions.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([name, count]) => ({
+        id: name.toLowerCase().replace(/\s+/g, "-"),
+        name,
+        type: "institution" as const,
+        activity: count,
+        recentWork: "Research appearing in mock dataset",
+        specialization: "Quantum Computing",
+        collaborations: count,
+      }));
+
+    const topAuthors = [...authors.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([name, count]) => ({
+        id: name.toLowerCase().replace(/\s+/g, "-"),
+        name,
+        type: "author" as const,
+        activity: count,
+        affiliation: Array.from(institutions.keys())[0] || "",
+        recentWork: "Appears across related works",
+        specialization: "Quantum Information",
+        collaborations: Math.max(1, Math.round(count * 2)),
+      }));
+
+    return {
+      activePlayers,
+      totalCollaborations: collaborations,
+      researchClusters: 3,
+      players: [...topInstitutions, ...topAuthors] as Player[],
+    };
+  }, []);
   const getTypeIcon = (type: string) => {
     switch (type) {
       case "institution":
@@ -123,7 +197,7 @@ export const KeyPlayers = () => {
           <h2 className="text-xl font-semibold text-foreground">
             Key Players Analysis
           </h2>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={open}>
             <Network className="w-4 h-4 mr-2" />
             View Network Graph
           </Button>
@@ -131,17 +205,17 @@ export const KeyPlayers = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="text-3xl font-bold text-primary mb-2">6</div>
+            <div className="text-3xl font-bold text-primary mb-2">{stats.activePlayers}</div>
             <div className="text-sm text-muted-foreground">Active Players</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-secondary mb-2">89</div>
+            <div className="text-3xl font-bold text-secondary mb-2">{stats.totalCollaborations}</div>
             <div className="text-sm text-muted-foreground">
               Total Collaborations
             </div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-success mb-2">3</div>
+            <div className="text-3xl font-bold text-success mb-2">{stats.researchClusters}</div>
             <div className="text-sm text-muted-foreground">
               Research Clusters
             </div>
@@ -151,7 +225,7 @@ export const KeyPlayers = () => {
 
       {/* Player Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {mockPlayers.map((player) => {
+        {(stats.players.length ? stats.players : mockPlayers).map((player) => {
           const IconComponent = getTypeIcon(player.type);
           const activity = getActivityLevel(player.activity);
 
@@ -242,6 +316,18 @@ export const KeyPlayers = () => {
           );
         })}
       </div>
+
+      {/* Graph Dialog */}
+      <DialogRoot open={isOpen} onOpenChange={(e) => setIsOpen((e as any).open)}>
+        <DialogBackdrop />
+        <DialogContent maxW="6xl" p={4}>
+          <DialogCloseTrigger />
+          <DialogTitle>Research Collaboration Network</DialogTitle>
+          <DialogBody pt={4}>
+            <ForceGraph documents={mockDocuments} />
+          </DialogBody>
+        </DialogContent>
+      </DialogRoot>
 
       {/* Research Clusters */}
       <Card className="research-card p-6">

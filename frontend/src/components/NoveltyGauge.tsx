@@ -25,15 +25,15 @@ export const NoveltyGauge = ({ overview }: NoveltyGaugeProps) => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-foreground">
-            Novelty Assessment
+            Novelty Assessment: {novelty.level} Novelty
           </h2>
-          <Badge variant="secondary" className="text-sm">
+          <Badge variant="secondary" className="text-sm relative z-10">
             AI-Powered Analysis
           </Badge>
         </div>
 
         {/* Main Gauge */}
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-4 mt-6 sm:mt-8">
           <div className="relative inline-flex items-center justify-center">
             <div className="w-32 h-32 rounded-full bg-gradient-to-r from-destructive/20 via-warning/20 to-success/20 p-1">
               <div className="w-full h-full rounded-full bg-background flex items-center justify-center">

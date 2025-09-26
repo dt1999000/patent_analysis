@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Download, Copy, Edit3, FileText, CheckCircle } from "lucide-react";
+import { Download, Copy, Edit3, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface AttorneyBriefProps {
@@ -16,7 +16,9 @@ export const AttorneyBrief = ({ abstract }: AttorneyBriefProps) => {
   const [briefContent, setBriefContent] = useState(generateBrief(abstract));
 
   function generateBrief(abstract: string): string {
-    return `# PATENT NOVELTY AND PATENTABILITY ASSESSMENT
+    return `# PATENT NOVELTY AND PATENTABILITY ASSESSMENT 
+    
+    ${abstract}
 
 ## EXECUTIVE SUMMARY
 
@@ -218,7 +220,7 @@ For questions regarding this analysis, contact:
             </Button>
             <Button size="sm" onClick={handleExport} className="btn-primary">
               <Download className="w-4 h-4 mr-2" />
-              Export PDF
+              PDF
             </Button>
           </div>
         </div>
