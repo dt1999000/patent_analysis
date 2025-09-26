@@ -8,6 +8,9 @@ from app.services.analyze.prompts import get_analyze_topic_prompt
 from pydantic import BaseModel, Field
 from app.services.analyze.prompts import get_topic_refinement_prompt, get_author_refinement_prompt, get_institution_refinement_prompt
 from app.services.ingest import IngestedDocument
+from app.services.retrieval import BaseRetrieval
+from app.schemas import LogicMillQuery, NoveltyAssessmentResponse
+
 class Topic(BaseModel):
     topic: str = Field(description="A topic of the document, describing the one core concept or idea of the document")
     subtopics: List[str] = Field(description="A list of subtopics/child topics of the document, describing the specific aspects or details of the topic")
@@ -425,9 +428,26 @@ class BaseAnalyzeService(AnalyzeService):
     def analyze(self, text: str) -> str:
         pass
 
-    def assess_novelty(self, text: str, documents: List[IngestedDocument]) -> str:
+    def assess_novelty(self, text: str) -> NoveltyAssessmentResponse:
         # Use the similarity score to assess the novelty of the paper
-        pass
+        retrieval_service = BaseRetrieval()
+        retrieved_documents = retrieval_service.retrieve(LogicMillQuery(title=text, abstract=text, amount=50, model="patspecter"))
+        average_score = 0
+        highest_similarity_score = 0
+        if retrieved_documents is None:
+            return NoveltyAssessmentResponse(novelty_assesment="No documents found", highest_similarity_score=1, average_similarity_score=1, document_count=0)
+        for document in retrieved_documents.response:
+            print(document.score)
+            average_score += document.score
+            highest_similarity_score = max(highest_similarity_score, document.score)
+        average_score /= len(retrieved_documents.response)
+        if average_score > 0.9:
+            return NoveltyAssessmentResponse(novelty_assesment="Lowly Novel", highest_similarity_score=highest_similarity_score, average_similarity_score=average_score, document_count=len(retrieved_documents.response))
+        elif average_score > 0.8:
+            return NoveltyAssessmentResponse(novelty_assesment="Moderately Novel", highest_similarity_score=highest_similarity_score, average_similarity_score=average_score, document_count=len(retrieved_documents.response))
+        
+        return NoveltyAssessmentResponse(novelty_assesment="Highly Novel", highest_similarity_score=highest_similarity_score, average_similarity_score=average_score, document_count=len(retrieved_documents.response))
+
 
     def assess_impact(self, text: str, documents: List[IngestedDocument]) -> str:
         # LLM to search for the impact of the paper on that domain/industry

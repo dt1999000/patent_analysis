@@ -109,3 +109,12 @@ class Patent(BaseModel):
     pdf_url: str | None
     meta: dict
     fulltext: str
+
+class NoveltyAssessmentRequest(BaseModel):
+    text: str
+
+class NoveltyAssessmentResponse(BaseModel):
+    novelty_assesment: str
+    highest_similarity_score: float
+    average_similarity_score: float
+    document_count: int

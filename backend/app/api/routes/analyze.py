@@ -11,6 +11,7 @@ from app.services.analyze.analyze import (
 from app.services.ingest import IngestedDocument
 from app.services.ingest import IngestService
 from app.api.deps import get_ingest_service
+from app.schemas import NoveltyAssessmentRequest, NoveltyAssessmentResponse
 
 
 
@@ -43,3 +44,10 @@ def analyze_network(
     analyze_service: AnalyzeService = Depends(get_analyze_service),
 ) -> GraphAnalysisResult:
     return analyze_service.aggregate_rank_analyze(documents)
+
+@router.post("/novelty", response_model=NoveltyAssessmentResponse)
+def assess_novelty(
+    request: NoveltyAssessmentRequest,
+    analyze_service: AnalyzeService = Depends(get_analyze_service),
+) -> NoveltyAssessmentResponse:
+    return analyze_service.assess_novelty(request.text)
