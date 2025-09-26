@@ -3,15 +3,18 @@ from app.services.ingest import IngestedDocument
 
 def get_analyze_topic_prompt(text: str) -> str:
     return f"""
-    You are a helpful assistant that analyzes the topic of the following text:
+    You are a helpful assistant that analyzes the scientific topics of the following research paper:
     {text}
+    Remember to return the topic in English language, independent of the language of the text.
     """
 
 def get_topic_refinement_prompt(documents: List[IngestedDocument]) -> str:
     return f"""
     You are a helpful assistant that refines the topic of scientific documents.
-    In the given list, each document has a list of topics. Look at all the topics of all the documents, harmonize
-    them into a list of topics that are common to all the documents. Make sure the topics are semantically meaningful, mutually exclusive, and consistent.
+    In the given list, each element contains the list of topics of one document. Look at all the topics of all the documents, harmonize
+    them into a list of topics that are common to all the documents. Make sure the topics are semantically meaningful, mutually exclusive, and consistent. 
+    Note that one document can contain multiple topics, and one topic can be present in multiple documents. The same applies for subtopics.
+    The goal is to have multiple documents sharing the same topic, tune and find the appropriate fine grained/coarse grained topics and assign these to the existing documents.
     {documents}
     """
 
