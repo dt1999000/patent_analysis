@@ -17,7 +17,13 @@ class LLMService(ABC):
 class BaseLLMService(LLMService):
     def __init__(self, api_key: str=settings.ANTHROPIC_API_KEY):
         self.api_key = api_key
-        self.llm = Anthropic(api_key=self.api_key, model="claude-3-5-haiku-latest", temperature=0.0)
+        self.llm = Anthropic(api_key=self.api_key, model="claude-sonnet-4-0", temperature=0.0, max_tokens=8192, tools=[
+        {
+            "type": "web_search_20250305",
+            "name": "web_search",
+            "max_uses": 5,  # Limit to 3 searches
+        }
+        ])
 
     def complete(self, prompt: str) -> str:
         return self.llm.complete(prompt).text
@@ -36,6 +42,5 @@ class BaseLLMService(LLMService):
             parsed = raw_text
         # Validate and coerce into the provided Pydantic model class
         return model.model_validate(parsed)
-
     def generate_text_with_context(self, prompt: str, context: str) -> str:
         pass
