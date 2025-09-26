@@ -3,6 +3,7 @@ import json
 from llama_index.llms.anthropic import Anthropic
 from app.core.config import settings
 from pydantic import BaseModel
+from typing import Type, TypeVar
 
 class LLMService(ABC):
     @abstractmethod
@@ -21,10 +22,20 @@ class BaseLLMService(LLMService):
     def complete(self, prompt: str) -> str:
         return self.llm.complete(prompt).text
 
-    def structured_complete(self, prompt: str, model: BaseModel):
+    def structured_complete(self, prompt: str, model: Type[BaseModel]) -> BaseModel:
+        """Return a Pydantic model instance validated from the LLM JSON output.
+
+        The `model` argument must be a subclass of pydantic.BaseModel.
+        """
         sllm = self.llm.as_structured_llm(model)
-        response = json.loads(sllm.complete(prompt).text)
-        return response
+        raw_text = sllm.complete(prompt).text
+        try:
+            parsed = json.loads(raw_text)
+        except Exception:
+            # If the LLM already returned a JSON-able structure string, keep as-is
+            parsed = raw_text
+        # Validate and coerce into the provided Pydantic model class
+        return model.model_validate(parsed)
 
     def generate_text_with_context(self, prompt: str, context: str) -> str:
         pass
