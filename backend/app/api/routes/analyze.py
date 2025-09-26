@@ -35,7 +35,12 @@ def refine_topics(title: str, abstract: str, ingest_service: IngestService = Dep
 @router.post("/refine/all")
 def refine_all(title: str, abstract: str, amount: int, ingest_service: IngestService = Depends(get_ingest_service), analyze_service: AnalyzeService = Depends(get_analyze_service)) -> List[IngestedDocument]:
     documents = ingest_service.ingest(title, abstract, amount)
-    return analyze_service.refine_documents(documents)    
+    return analyze_service.refine_documents(documents)   
+
+@router.post("/assess/impact")
+def assess_impact(title: str, abstract: str, amount: int, ingest_service: IngestService = Depends(get_ingest_service), analyze_service: AnalyzeService = Depends(get_analyze_service)):
+    documents = ingest_service.ingest(title, abstract, amount)
+    return analyze_service.assess_impact(title+abstract, documents)
 
 
 @router.post("/network", response_model=GraphAnalysisResult)
