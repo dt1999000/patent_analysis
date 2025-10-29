@@ -85,8 +85,8 @@ class PublicationFull(PublicationBase):
     topics: List[Topic]
     authorships: List[Authorship]
     concepts: List[Concept]
-    referenced_works: List[str]
-    related_works: List[str]
+    citations: List[str]  # List of publication/patent IDs that this publication cites
+    cited_by: List[str] 
     counts_by_year: List[Dict]
     fulltext: str
 
@@ -109,6 +109,8 @@ class Patent(BaseModel):
     pdf_url: str | None
     meta: dict
     fulltext: str
+    citations: List[str]  # List of patent/publication IDs that this patent cites
+    cited_by: List[str]   # List of patent/publication IDs that cite this patent
 
 class NoveltyAssessmentRequest(BaseModel):
     text: str

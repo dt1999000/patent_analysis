@@ -9,7 +9,7 @@ import pyalex
 from pyalex import Authors, Works
 from app.schemas import PublicationBase, PublicationFull, Topic, Authorship, AuthorshipInstitution, Concept, Location, PublicationGroup, Author
 from typing import List
-
+import json
 
 # Configure PyAlex
 pyalex.config.email = "dt1999000@gmail.com"  # Replace with your email for proper attribution
@@ -45,6 +45,26 @@ class ScrapingService:
         html = self._fetch_html(url)
         data = parse_google_patent_html(html, source_url=url)
         return data
+    
+    def get_cited_by_list(self, patent_id: str) -> List[str]:
+        work = Works()[patent_id]
+        cited_by_list = work.get('cited_by_api_url', [])
+        json_content = json.loads(self._fetch_html(cited_by_list))
+        data = json_content['results']
+        ids = [result['id'] for result in data]
+        
+        # Extract just the ID part from the full OpenAlex URL
+        # Convert "https://openalex.org/W4408457330" to "W4408457330"
+        extracted_ids = []
+        for full_url in ids:
+            if full_url.startswith("https://openalex.org/"):
+                extracted_id = full_url.split("https://openalex.org/")[-1]
+                extracted_ids.append(extracted_id)
+            else:
+                # If it's not a full URL, use as is
+                extracted_ids.append(full_url)
+        
+        return extracted_ids
 
     def get_publication(self, work_id: str) -> PublicationBase:
         """
@@ -136,11 +156,11 @@ class ScrapingService:
             topics=topics,
             authorships=authorships,
             concepts=concepts,
-            referenced_works=work.get('referenced_works', []),
-            related_works=work.get('related_works', []),
+            citations=work.get('referenced_works', []),
+            cited_by=self.get_cited_by_list(work['id']),
             counts_by_year=work.get('counts_by_year', []),
             fulltext=("<fulltext>")
-        )
+            )
 
     def get_works_by_author(self, author_id: str, max_works: int = 5) -> List[PublicationBase]:
         """

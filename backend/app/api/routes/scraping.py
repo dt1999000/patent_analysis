@@ -15,6 +15,9 @@ def get_patent(patent_id: str, scraping_service: ScrapingService = Depends(get_s
     data = scraping_service.get_patent(patent_id)
     return Patent(**data)
 
+@router.get("/cited_by/{patent_id}")
+def get_cited_by(patent_id: str, scraping_service: ScrapingService = Depends(get_scraping_service)):
+    return scraping_service.get_cited_by_list(patent_id)
 
 @router.get("/publication/{publication_id}", response_model=PublicationFull)
 def get_publication(publication_id: str, scraping_service: ScrapingService = Depends(get_scraping_service)):

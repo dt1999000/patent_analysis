@@ -77,6 +77,34 @@ def _extract_publication_id(html: str) -> Optional[str]:
     return m.group(1) if m else None
 
 
+def _extract_citations(html: str) -> list[str]:
+    """Extract citation IDs from both forward and backward references"""
+    citations = []
+    
+    # Extract forward references (patents this patent cites)
+    forward_refs = _find_all(r"<tr[^>]*itemprop=\"forwardReferencesFamily\"[^>]*>(.*?)</tr>", html, flags=re.I | re.S)
+    for ref in forward_refs:
+        pub_number = _find_first(r"<span[^>]*itemprop=\"publicationNumber\"[^>]*>(.*?)</span>", ref, flags=re.I | re.S)
+        if pub_number:
+            citations.append(_strip_tags(pub_number))
+    
+    return citations
+
+
+def _extract_cited_by(html: str) -> list[str]:
+    """Extract cited_by IDs from patents that cite this patent"""
+    cited_by = []
+    
+    # Extract backward references (patents that cite this patent)
+    backward_refs = _find_all(r"<tr[^>]*itemprop=\"backwardReferencesFamily\"[^>]*>(.*?)</tr>", html, flags=re.I | re.S)
+    for ref in backward_refs:
+        pub_number = _find_first(r"<span[^>]*itemprop=\"publicationNumber\"[^>]*>(.*?)</span>", ref, flags=re.I | re.S)
+        if pub_number:
+            cited_by.append(_strip_tags(pub_number))
+    
+    return cited_by
+
+
 def _extract_meta(html: str) -> dict[str, Any]:
     meta: dict[str, Any] = {}
 
@@ -130,6 +158,8 @@ def parse_google_patent_html(html: str, source_url: Optional[str] = None) -> dic
     meta = _extract_meta(html)
     pub_id = _extract_publication_id(html)
     url = source_url or _extract_canonical_url(html)
+    citations = _extract_citations(html)
+    cited_by = _extract_cited_by(html)
 
     fulltext = abstract if abstract else ""
     fulltext += description if description else ""
@@ -145,7 +175,9 @@ def parse_google_patent_html(html: str, source_url: Optional[str] = None) -> dic
         "authors": authors,
         "pdf_url": pdf_url,
         "meta": meta,
-        "fulltext": fulltext
+        "fulltext": fulltext,
+        "citations": citations,
+        "cited_by": cited_by
     }
 
 
